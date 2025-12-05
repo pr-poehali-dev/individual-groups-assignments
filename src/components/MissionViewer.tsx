@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
+import LevelRiddle from '@/components/LevelRiddle';
 
 type LevelStatus = 'locked' | 'available' | 'completed';
 
@@ -89,11 +90,29 @@ export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
   const [missions, setMissions] = useState<Mission[]>(initialMissions);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeRiddleLevel, setActiveRiddleLevel] = useState<number | null>(null);
 
   const openMission = (mission: Mission) => {
     if (mission.status !== 'locked' && isUnlocked) {
       setSelectedMission(mission);
       setIsDialogOpen(true);
+    }
+  };
+
+  const startLevel = (levelId: number) => {
+    // Уровни 2, 3, 4 требуют загадки
+    if (levelId >= 2 && levelId <= 4) {
+      setActiveRiddleLevel(levelId);
+    } else {
+      // Уровень 1 проходится без загадки
+      completeLevel(selectedMission!.id, levelId);
+    }
+  };
+
+  const handleRiddleSolved = () => {
+    if (activeRiddleLevel && selectedMission) {
+      completeLevel(selectedMission.id, activeRiddleLevel);
+      setActiveRiddleLevel(null);
     }
   };
 
@@ -254,66 +273,90 @@ export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
                 </div>
 
                 <h3 className="text-xl font-bold mb-4 text-gray-900">Уровни миссии</h3>
-                <div className="space-y-3">
-                  {selectedMission.levels.map((level, index) => (
-                    <Card
-                      key={level.id}
-                      className={`p-4 transition-all duration-300 ${
-                        level.status === 'locked' 
-                          ? 'opacity-50 bg-gray-50' 
-                          : level.status === 'completed'
-                          ? 'bg-green-50 border-green-300'
-                          : 'bg-white hover:shadow-md'
-                      }`}
+                
+                {activeRiddleLevel ? (
+                  <div className="space-y-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveRiddleLevel(null)}
+                      className="mb-4"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                              level.status === 'completed' ? 'bg-green-500 text-white' :
-                              level.status === 'available' ? 'bg-blue-500 text-white' :
-                              'bg-gray-300 text-gray-600'
-                            }`}>
-                              {level.status === 'completed' ? '✓' : index + 1}
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900">{level.title}</h4>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Icon name="Star" size={14} className="text-amber-500" />
-                                <span>{level.points} баллов</span>
+                      <Icon name="ArrowLeft" size={18} className="mr-2" />
+                      Вернуться к уровням
+                    </Button>
+                    <LevelRiddle 
+                      levelId={activeRiddleLevel} 
+                      onSolved={handleRiddleSolved}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedMission.levels.map((level, index) => (
+                      <Card
+                        key={level.id}
+                        className={`p-4 transition-all duration-300 ${
+                          level.status === 'locked' 
+                            ? 'opacity-50 bg-gray-50' 
+                            : level.status === 'completed'
+                            ? 'bg-green-50 border-green-300'
+                            : 'bg-white hover:shadow-md'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                level.status === 'completed' ? 'bg-green-500 text-white' :
+                                level.status === 'available' ? 'bg-blue-500 text-white' :
+                                'bg-gray-300 text-gray-600'
+                              }`}>
+                                {level.status === 'completed' ? '✓' : index + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{level.title}</h4>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Icon name="Star" size={14} className="text-amber-500" />
+                                  <span>{level.points} баллов</span>
+                                  {level.id >= 2 && level.id <= 4 && (
+                                    <Badge variant="outline" className="text-xs ml-2">
+                                      <Icon name="Brain" size={12} className="mr-1" />
+                                      Загадка
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
+                            <p className="text-sm text-gray-600 ml-11">{level.description}</p>
                           </div>
-                          <p className="text-sm text-gray-600 ml-11">{level.description}</p>
+
+                          {level.status === 'available' && (
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 animate-pulse"
+                              onClick={() => startLevel(level.id)}
+                            >
+                              Пройти
+                            </Button>
+                          )}
+                          
+                          {level.status === 'completed' && (
+                            <Badge className="bg-green-500">
+                              <Icon name="Check" size={14} className="mr-1" />
+                              Пройдено
+                            </Badge>
+                          )}
+
+                          {level.status === 'locked' && (
+                            <Badge variant="outline" className="text-gray-500">
+                              <Icon name="Lock" size={14} className="mr-1" />
+                              Закрыто
+                            </Badge>
+                          )}
                         </div>
-
-                        {level.status === 'available' && (
-                          <Button
-                            size="sm"
-                            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 animate-pulse"
-                            onClick={() => completeLevel(selectedMission.id, level.id)}
-                          >
-                            Пройти
-                          </Button>
-                        )}
-                        
-                        {level.status === 'completed' && (
-                          <Badge className="bg-green-500">
-                            <Icon name="Check" size={14} className="mr-1" />
-                            Пройдено
-                          </Badge>
-                        )}
-
-                        {level.status === 'locked' && (
-                          <Badge variant="outline" className="text-gray-500">
-                            <Icon name="Lock" size={14} className="mr-1" />
-                            Закрыто
-                          </Badge>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           )}
