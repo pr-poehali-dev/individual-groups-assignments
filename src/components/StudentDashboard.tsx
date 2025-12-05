@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import MissionViewer from '@/components/MissionViewer';
 
 interface Achievement {
   id: string;
@@ -231,38 +232,7 @@ export default function StudentDashboard() {
         </TabsList>
 
         <TabsContent value="missions" className="space-y-4 mt-6">
-          {MISSIONS.map((mission) => (
-            <Card key={mission.id} className="hover:shadow-lg transition-all border-2 border-blue-100 hover:border-blue-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">{mission.title}</h3>
-                    <Badge variant="outline" className="text-xs">
-                      {mission.subject}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge 
-                      className={`${
-                        mission.status === 'completed' 
-                          ? 'bg-green-500' 
-                          : mission.status === 'in_progress' 
-                          ? 'bg-blue-500' 
-                          : 'bg-gray-400'
-                      } text-white`}
-                    >
-                      {mission.status === 'completed' && '✓ Завершена'}
-                      {mission.status === 'in_progress' && '⏳ В процессе'}
-                      {mission.status === 'locked' && '🔒 Заблокирована'}
-                    </Badge>
-                    <span className="text-sm font-semibold text-orange-600">+{mission.xp} XP</span>
-                  </div>
-                </div>
-                <Progress value={mission.progress} className="h-2" />
-                <p className="text-sm text-gray-600 mt-2">{mission.progress}% выполнено</p>
-              </CardContent>
-            </Card>
-          ))}
+          <MissionViewer />
         </TabsContent>
 
         <TabsContent value="achievements" className="space-y-4 mt-6">
