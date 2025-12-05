@@ -81,13 +81,17 @@ const initialMissions: Mission[] = [
   },
 ];
 
-export default function MissionViewer() {
+interface MissionViewerProps {
+  isUnlocked: boolean;
+}
+
+export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
   const [missions, setMissions] = useState<Mission[]>(initialMissions);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const openMission = (mission: Mission) => {
-    if (mission.status !== 'locked') {
+    if (mission.status !== 'locked' && isUnlocked) {
       setSelectedMission(mission);
       setIsDialogOpen(true);
     }
@@ -149,6 +153,20 @@ export default function MissionViewer() {
     }
   };
 
+  if (!isUnlocked) {
+    return (
+      <Card className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-300 text-center">
+        <div className="space-y-4">
+          <div className="text-6xl opacity-50">🔒</div>
+          <h3 className="text-2xl font-bold text-gray-700">Миссии заблокированы</h3>
+          <p className="text-gray-600">
+            Реши загадку про спасение морских птиц, чтобы открыть доступ к миссиям
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -156,7 +174,7 @@ export default function MissionViewer() {
           <Card
             key={mission.id}
             className={`p-6 transition-all duration-300 hover:shadow-xl animate-fade-in cursor-pointer ${
-              mission.status === 'locked' ? 'opacity-60 cursor-not-allowed' : 'hover-scale'
+              mission.status === 'locked' || !isUnlocked ? 'opacity-60 cursor-not-allowed' : 'hover-scale'
             }`}
             style={{ animationDelay: `${index * 100}ms` }}
             onClick={() => openMission(mission)}
@@ -189,7 +207,7 @@ export default function MissionViewer() {
               <Progress value={(mission.completedLevels / mission.totalLevels) * 100} className="h-2" />
             </div>
 
-            {mission.status !== 'locked' && (
+            {mission.status !== 'locked' && isUnlocked && (
               <Button 
                 className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                 onClick={(e) => {

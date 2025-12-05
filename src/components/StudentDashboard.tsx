@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import MissionViewer from '@/components/MissionViewer';
+import BirdRiddle from '@/components/BirdRiddle';
 
 interface Achievement {
   id: string;
@@ -135,6 +137,7 @@ const SUBJECTS = [
 ];
 
 export default function StudentDashboard() {
+  const [riddleSolved, setRiddleSolved] = useState(false);
   const xpProgress = (STATS.currentXP / STATS.nextLevelXP) * 100;
   const missionProgress = (STATS.completedMissions / STATS.totalMissions) * 100;
 
@@ -231,8 +234,9 @@ export default function StudentDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="missions" className="space-y-4 mt-6">
-          <MissionViewer />
+        <TabsContent value="missions" className="space-y-6 mt-6">
+          <BirdRiddle onSolved={() => setRiddleSolved(true)} isSolved={riddleSolved} />
+          <MissionViewer isUnlocked={riddleSolved} />
         </TabsContent>
 
         <TabsContent value="achievements" className="space-y-4 mt-6">
