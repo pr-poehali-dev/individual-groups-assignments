@@ -84,9 +84,11 @@ const initialMissions: Mission[] = [
 
 interface MissionViewerProps {
   isUnlocked: boolean;
+  coins: number;
+  onCoinsChange: (coins: number) => void;
 }
 
-export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
+export default function MissionViewer({ isUnlocked, coins, onCoinsChange }: MissionViewerProps) {
   const [missions, setMissions] = useState<Mission[]>(initialMissions);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -109,10 +111,11 @@ export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
     }
   };
 
-  const handleRiddleSolved = () => {
+  const handleRiddleSolved = (earnedCoins: number, bonusPoints: number) => {
     if (activeRiddleLevel && selectedMission) {
       completeLevel(selectedMission.id, activeRiddleLevel);
       setActiveRiddleLevel(null);
+      // Здесь можно добавить анимацию или уведомление о наградах
     }
   };
 
@@ -287,6 +290,8 @@ export default function MissionViewer({ isUnlocked }: MissionViewerProps) {
                     <LevelRiddle 
                       levelId={activeRiddleLevel} 
                       onSolved={handleRiddleSolved}
+                      coins={coins}
+                      onCoinsChange={onCoinsChange}
                     />
                   </div>
                 ) : (

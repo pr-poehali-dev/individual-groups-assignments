@@ -138,6 +138,7 @@ const SUBJECTS = [
 
 export default function StudentDashboard() {
   const [riddleSolved, setRiddleSolved] = useState(false);
+  const [coins, setCoins] = useState(100); // Стартовые монеты
   const xpProgress = (STATS.currentXP / STATS.nextLevelXP) * 100;
   const missionProgress = (STATS.completedMissions / STATS.totalMissions) * 100;
 
@@ -148,9 +149,15 @@ export default function StudentDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Мой прогресс</h1>
           <p className="text-gray-600 mt-1">Отслеживай свои достижения и развитие</p>
         </div>
-        <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-lg animate-scale-in">
-          {STATS.rank}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-4 py-2 text-lg animate-scale-in shadow-lg">
+            <Icon name="Coins" size={20} className="mr-2" />
+            {coins} монет
+          </Badge>
+          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-lg animate-scale-in">
+            {STATS.rank}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -236,7 +243,7 @@ export default function StudentDashboard() {
 
         <TabsContent value="missions" className="space-y-6 mt-6">
           <BirdRiddle onSolved={() => setRiddleSolved(true)} isSolved={riddleSolved} />
-          <MissionViewer isUnlocked={riddleSolved} />
+          <MissionViewer isUnlocked={riddleSolved} coins={coins} onCoinsChange={setCoins} />
         </TabsContent>
 
         <TabsContent value="achievements" className="space-y-4 mt-6">
